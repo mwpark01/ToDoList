@@ -14,7 +14,7 @@ final class Work {
     var date: Date
     var isDone: Bool
     var isEditing: Bool = false
-    init(content: String, date: Date, isDone: Bool = false) {
+    init(content: String, date: Date = Date(), isDone: Bool = false) {
         self.content = content
         self.date = date
         self.isDone = isDone

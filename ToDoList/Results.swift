@@ -21,7 +21,7 @@ struct Results: View {
                     HStack {
                         Text(work.content ?? "Not Found")
                         Spacer()
-                        Text(work.date, style: .date)
+                        Text(work.date, format: Date.FormatStyle(date: .numeric, time: .standard))
                     }
                 }
             }

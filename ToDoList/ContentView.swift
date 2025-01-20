@@ -12,7 +12,7 @@ struct ContentView: View {
     @State var content: String = ""
     @State var editingContent: String = ""
     @State var date: Date = Date()
-    @State var editing: Bool = false
+    @State var isEditing: Bool = false
     
     @Environment(\.modelContext) private var modelContext
     @Query private var works: [Work]
@@ -37,6 +37,7 @@ struct ContentView: View {
                     Button(action: {
                         if !content.isEmpty {
                             addWork()
+                            content = ""
                         }
                         
                     }, label: {
@@ -56,37 +57,49 @@ struct ContentView: View {
                     ForEach(works) { work in
                         VStack {
                             HStack {
-                                Button(action: {
-                                    toggleIsDone(work)
-                                }, label: {
-                                    if work.isDone {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.green)
-                                    } else {
-                                        Image(systemName:
-                                                "xmark.circle.fill")
-                                        .foregroundStyle(.red)
-                                    }
-                                })
+                                if !isEditing {
+                                    Button(action: {
+                                        toggleIsDone(work)
+                                    }, label: {
+                                        if work.isDone {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundStyle(.green)
+                                        } else {
+                                            Image(systemName:
+                                                    "xmark.circle.fill")
+                                            .foregroundStyle(.red)
+                                        }
+                                    })
+                                }
+                                
                                 if work.isEditing {
-                                    TextField("", text: $editingContent)
-                                        .onSubmit {
-                                            // 엔터 키 눌렀을 때 실행할 코드
+                                    HStack {
+                                        TextField("", text: $editingContent)
+                                        Spacer()
+                                        Button(action: {
                                             work.isEditing = false
+                                            isEditing = false
                                             work.content = editingContent
                                             editingContent = ""
-                                        }
+                                        }, label: {
+                                            Text("확인")
+                                        })
+                                    }
                                 } else {
                                     Text(work.content ?? "")
+                                    // 눌렀을 때 편집모드
                                         .onLongPressGesture(minimumDuration: 0.5) {
-                                            work.isEditing = true
-                                            editingContent = work.content ?? ""
+                                            if !isEditing {
+                                                isEditing = true
+                                                work.isEditing = true
+                                                editingContent = work.content ?? ""
+                                            }
                                         }
+                                    
                                 }
                                 Spacer()
                             }
-                            
-                            Text(work.date, style: .date)
+                            Text(work.date, format: Date.FormatStyle(date: .numeric, time: .standard))
                                 .font(.caption)
                                 .italic()
                         }
@@ -108,7 +121,6 @@ struct ContentView: View {
     
     func addWork() {
         withAnimation {
-            
             let newWork = Work(content: content, date: Date())
             modelContext.insert(newWork)
         }
